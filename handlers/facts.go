@@ -9,9 +9,26 @@ import (
 func FindFact(c *fiber.Ctx) error {
 	var facts []models.Fact
 
-	database.DB.Db.Find(&facts)
+	result := database.DB.Db.Find(&facts)
 
-	return c.Status(200).JSON(facts)
+	if result.RowsAffected == 0 {
+		return c.SendStatus(fiber.StatusNotFound)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(facts)
+}
+
+func FindFactById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var fact models.Fact
+
+	result := database.DB.Db.Find(&fact, id)
+
+	if result.RowsAffected == 0 {
+		return c.SendStatus(fiber.StatusNotFound)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(&fact)
 }
 
 func CreateFact(c *fiber.Ctx) error {
@@ -24,5 +41,5 @@ func CreateFact(c *fiber.Ctx) error {
 
 	database.DB.Db.Create(&fact)
 
-	return c.Status(200).JSON(fact)
+	return c.Status(fiber.StatusOK).JSON(fact)
 }
